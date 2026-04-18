@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Upload | Novidra Studio</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body style="display:flex; justify-content:center; align-items:center; height:100vh;">
+    
+    <div style="background:#111; padding:40px; border-radius:12px; width:90%; max-width:500px; border:1px solid var(--border);">
+        <h1 style="color:var(--accent); text-align:center;">Novidra Studio</h1>
+        
+        <input type="text" id="vidTitle" placeholder="Video Title" style="width:100%; padding:15px; margin-bottom:20px; background:#000; border:1px solid var(--border); color:white; border-radius:8px; box-sizing: border-box;">
+        
+        <div style="border:2px dashed var(--accent); padding:30px; text-align:center; border-radius:8px; margin-bottom:20px;">
+            <p style="color:var(--text-dim); margin-bottom:10px;">Select MP4 File</p>
+            <input type="file" id="vidFile" accept="video/mp4" style="color:white;">
+        </div>
+
+        <button onclick="uploadVideo()" id="pubBtn" style="width:100%; background:var(--accent); color:#000; font-weight:bold; padding:15px; border:none; border-radius:8px; cursor:pointer;">Publish Video</button>
+        <p id="uploadStatus" style="text-align:center; color:var(--accent); margin-top:15px;"></p>
+        
+        <p style="text-align:center; margin-top:20px; cursor:pointer; color:var(--text-dim);" onclick="window.location.href='index.html'">Back to Home</p>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
