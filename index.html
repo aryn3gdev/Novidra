@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Novidra | Future of Video</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <div class="header-left">
+            <div id="menu-toggle">☰</div>
+            <div class="logo"><span>◈</span> NOVIDRA</div>
+        </div>
+        
+        <div class="search-bar">
+            <input type="text" placeholder="Search Novidra" id="searchInput">
+            <button class="search-btn">🔍</button>
+        </div>
+        
+        <div class="header-right">
+            <div class="user-container">
+                <button class="signin-btn" id="userBtn" onclick="handleUserClick()">👤 Sign In</button>
+                
+                <div class="dropdown-menu" id="userDropdown">
+                    <div class="dropdown-item" onclick="alert('Going to Channel...')">👤 Your Channel</div>
+                    <div class="dropdown-item" onclick="alert('Opening Settings...')">⚙️ Settings</div>
+                    <div class="dropdown-item" onclick="swapAccount()">🔄 Switch Account</div>
+                    <hr>
+                    <div class="dropdown-item logout" onclick="logout()">🚪 Logout</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <aside id="sidebar">
+        <div class="nav-link">🏠 Home</div>
+        <div class="nav-link">🔥 Trending</div>
+        <div class="nav-link">📺 Subscriptions</div>
+        <hr>
+        <div class="nav-link">🕒 History</div>
+        <div class="nav-link">✨ My Novidra</div>
+    </aside>
+
+    <main id="mainContent">
+        <div class="grid" id="videoContainer"></div>
+    </main>
+
+    <div class="overlay" id="modalOverlay">
+        <div class="modal">
+            <h2 id="mTitle">Join Novidra</h2>
+            <p id="mSubtitle">The neon future of video</p>
+            <input type="text" id="uName" placeholder="Username">
+            <input type="password" id="uPass" placeholder="Password">
+            <button class="btn-primary" onclick="handleAuth()">Continue</button>
+            <p class="switch-text" onclick="swapAuth()" id="swapText">Create account</p>
+            <p class="cancel-text" onclick="toggleModal()">Cancel</p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
