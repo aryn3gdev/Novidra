@@ -2,140 +2,32 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Watching | Novidra</title>
     <link rel="stylesheet" href="style.css">
-    <style>
-        /* Specific styles for the Watch Page */
-        .watch-container {
-            display: flex;
-            gap: 24px;
-            max-width: 1700px;
-            margin: 80px auto 0 auto;
-            padding: 0 24px;
-        }
-
-        .video-column { flex: 3; }
-        .suggestions-column { flex: 1; }
-
-        .main-player {
-            width: 100%;
-            aspect-ratio: 16 / 9;
-            background: #000;
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--accent);
-            font-size: 24px;
-            text-shadow: 0 0 10px var(--accent);
-        }
-
-        .video-info-box { margin-top: 20px; }
-        .video-info-box h1 { font-size: 20px; margin-bottom: 10px; }
-        
-        .owner-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .subscribe-btn {
-            background: var(--text-main);
-            color: #000;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .side-card {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 12px;
-            cursor: pointer;
-        }
-
-        .side-thumb {
-            width: 160px;
-            height: 90px;
-            background: #111;
-            border-radius: 8px;
-            flex-shrink: 0;
-        }
-
-        @media (max-width: 1000px) {
-            .watch-container { flex-direction: column; }
-            .suggestions-column { width: 100%; }
-        }
-    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-
     <header>
-        <div class="header-left">
-            <div id="menu-toggle">☰</div>
-            <div class="logo" onclick="window.location.href='index.html'"><span>◈</span> NOVIDRA</div>
-        </div>
-        <div class="search-bar">
-            <input type="text" placeholder="Search Novidra">
-            <button class="search-btn">🔍</button>
-        </div>
-        <div class="header-right">
-            <button class="signin-btn" id="userBtn" onclick="handleUserClick()">👤 Sign In</button>
-        </div>
+        <div class="logo" onclick="window.location.href='index.html'" style="cursor:pointer; padding:20px;"><span>◈</span> NOVIDRA</div>
     </header>
 
-    <div class="watch-container">
-        <div class="video-column">
-            <div class="main-player">
-                NOVIDRA PLAYER ACTIVE
-            </div>
-            <div class="video-info-box">
-                <h1 id="videoTitle">Novidra Original Content</h1>
-                <div class="owner-bar">
-                    <div style="display:flex; align-items:center; gap:10px;">
-                        <div style="width:40px; height:40px; background:var(--accent); border-radius:50%;"></div>
-                        <div>
-                            <p style="margin:0; font-weight:bold;">Novidra Official</p>
-                            <p style="margin:0; font-size:12px; color:var(--text-dim);">1.2M Subscribers</p>
-                        </div>
-                    </div>
-                    <button class="subscribe-btn">Subscribe</button>
-                </div>
-                <div style="background:#111; padding:15px; border-radius:12px; margin-top:15px;">
-                    <p style="font-size:14px;">124,000 views • 2 hours ago</p>
-                    <p style="font-size:14px; color:var(--text-dim);">Welcome to the future of video. This is a Novidra Original broadcast.</p>
-                </div>
-            </div>
+    <main style="margin-top:80px; padding:20px; display:flex; flex-direction:column; align-items:center;">
+        <video id="mainPlayer" controls style="width:100%; max-width:1000px; border-radius:12px; border:1px solid var(--border); box-shadow: 0 0 20px rgba(0,255,255,0.2);"></video>
+        <div style="width:100%; max-width:1000px; margin-top:20px;">
+            <h1 id="vWatchTitle" style="font-size:24px;">Loading video...</h1>
+            <p id="vWatchStats" style="color:var(--text-dim);"></p>
         </div>
-
-        <div class="suggestions-column" id="nextVideos">
-            </div>
-    </div>
+    </main>
 
     <script src="script.js"></script>
     <script>
-        // Specific logic for Watch page
-        function generateSuggestions() {
-            const side = document.getElementById('nextVideos');
-            for(let i=1; i<=8; i++) {
-                side.innerHTML += `
-                    <div class="side-card">
-                        <div class="side-thumb"></div>
-                        <div>
-                            <p style="font-size:14px; font-weight:600; margin:0 0 5px 0;">Up Next: Episode ${i}</p>
-                            <p style="font-size:12px; color:var(--text-dim); margin:0;">Novidra Pro</p>
-                        </div>
-                    </div>
-                `;
-            }
-        }
-        generateSuggestions();
+        // Specific logic to play the video based on URL ID
+        window.onload = async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const videoId = urlParams.get('vid');
+            if(videoId) loadWatchPage(videoId);
+            checkLoginStatus();
+        };
     </script>
 </body>
 </html>
