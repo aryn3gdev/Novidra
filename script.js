@@ -1,130 +1,115 @@
-let isLoginMode = true;
+const SB_URL = 'https://pvfbfdldcouzenwftogb.supabase.co'; 
+const SB_KEY = 'sb_publishable_cPV-m7kqxEQq5QcS2bh7qA_6yptdu2T';
+const _supabase = supabase.createClient(SB_URL, SB_KEY);
 
-window.onload = () => {
-    checkLoginStatus();
-    generateVideos();
+let isLoginMode = true;
+let currentUserData = null;
+
+window.onload = async () => {
+    await checkLoginStatus();
+    if (document.getElementById('videoContainer')) loadVideosFromDB();
 };
 
-// --- AUTH LOGIC ---
-
-function checkLoginStatus() {
-    const activeUser = localStorage.getItem('currentUser');
+// --- AUTH ---
+async function checkLoginStatus() {
+    const { data: { session } } = await _supabase.auth.getSession();
     const userBtn = document.getElementById('userBtn');
-    if (activeUser) {
-        userBtn.innerText = "👤 " + activeUser;
-    } else {
-        userBtn.innerText = "👤 Sign In";
+    const uploadBtn = document.getElementById('uploadBtn');
+    
+    if (session) {
+        const { data: channel } = await _supabase.from('channels').select('*').eq('id', session.user.id).single();
+        if (channel) {
+            currentUserData = channel;
+            userBtn.innerHTML = `👤 ${channel.username}`;
+            if(uploadBtn) uploadBtn.style.display = 'inline-block';
+        }
     }
 }
 
-// Logic to decide if we show the Login Modal or the Dropdown Menu
-function handleUserClick() {
-    const activeUser = localStorage.getItem('currentUser');
-    if (activeUser) {
-        // Toggle the dropdown menu
-        const dropdown = document.getElementById('userDropdown');
-        dropdown.style.display = (dropdown.style.display === 'flex') ? 'none' : 'flex';
-    } else {
-        // Open the sign-in modal
-        toggleModal();
-    }
-}
-
-function handleAuth() {
-    const user = document.getElementById('uName').value.trim();
-    const pass = document.getElementById('uPass').value.trim();
-
-    if (!user || !pass) {
-        alert("Please fill in all fields.");
-        return;
-    }
+async function handleAuth() {
+    const username = document.getElementById('uName').value.trim();
+    const email = username + "@novidra.com"; 
+    const password = document.getElementById('uPass').value.trim();
 
     if (isLoginMode) {
-        const storedData = localStorage.getItem('novidra_user_' + user);
-        if (storedData) {
-            const parsedData = JSON.parse(storedData);
-            if (parsedData.password === pass) {
-                localStorage.setItem('currentUser', user);
-                checkLoginStatus();
-                toggleModal();
-                alert("Welcome to Novidra, " + user + "!");
-            } else {
-                alert("Incorrect password.");
-            }
-        } else {
-            alert("User not found.");
-        }
+        const { error } = await _supabase.auth.signInWithPassword({ email, password });
+        if (error) alert(error.message); else location.reload();
     } else {
-        if (localStorage.getItem('novidra_user_' + user)) {
-            alert("Username taken!");
-            return;
-        }
-        const newUser = { username: user, password: pass };
-        localStorage.setItem('novidra_user_' + user, JSON.stringify(newUser));
-        alert("Account created! Now Sign In.");
+        const { data, error } = await _supabase.auth.signUp({ email, password });
+        if (error) return alert(error.message);
+        await _supabase.from('channels').insert([{ id: data.user.id, username: username }]);
+        alert("Account Created! You can now log in.");
         swapAuth();
     }
 }
 
-// --- UI HELPERS ---
+// --- DATABASE & STORAGE ---
+async function loadVideosFromDB() {
+    const container = document.getElementById('videoContainer');
+    const { data: videos } = await _supabase.from('videos').select('*, channels(username)').order('created_at', { ascending: false });
+    
+    container.innerHTML = "";
+    videos.forEach(v => {
+        container.innerHTML += `
+            <div class="video-card" onclick="window.location.href='watch.html?vid=${v.id}'">
+                <div class="thumb" style="background: #111; display:flex; align-items:center; justify-content:center; color:var(--accent)">▶ PLAY</div>
+                <p class="v-title">${v.title}</p>
+                <p class="v-stats">${v.channels.username} • ${v.views} views</p>
+            </div>`;
+    });
+}
 
+async function uploadVideo() {
+    const title = document.getElementById('vidTitle').value;
+    const file = document.getElementById('vidFile').files[0];
+    const status = document.getElementById('uploadStatus');
+    
+    if (!title || !file) return alert("Fill in everything!");
+    
+    status.innerText = "Uploading... please don't close this tab.";
+    document.getElementById('pubBtn').disabled = true;
+
+    const fileName = `${Date.now()}_${file.name}`;
+    const { data, error } = await _supabase.storage.from('media').upload(fileName, file);
+
+    if (error) return alert(error.message);
+
+    const { data: urlData } = _supabase.storage.from('media').getPublicUrl(fileName);
+    
+    await _supabase.from('videos').insert([{ 
+        user_id: currentUserData.id, 
+        title: title, 
+        video_url: urlData.publicUrl 
+    }]);
+
+    alert("Success!");
+    window.location.href = 'index.html';
+}
+
+async function loadWatchPage(vid) {
+    const { data: video } = await _supabase.from('videos').select('*, channels(username)').eq('id', vid).single();
+    if (video) {
+        document.getElementById('mainPlayer').src = video.video_url;
+        document.getElementById('vWatchTitle').innerText = video.title;
+        document.getElementById('vWatchStats').innerText = `Uploaded by ${video.channels.username}`;
+        // Increment views
+        await _supabase.from('videos').update({ views: video.views + 1 }).eq('id', vid);
+    }
+}
+
+// --- UI ---
 function toggleModal() {
     const m = document.getElementById('modalOverlay');
-    // Toggle between none and flex
-    if (m.style.display === 'flex') {
-        m.style.display = 'none';
-    } else {
-        m.style.display = 'flex';
-    }
+    m.style.display = (m.style.display === 'flex') ? 'none' : 'flex';
 }
-
+function handleUserClick() {
+    if (currentUserData) {
+        const dd = document.getElementById('userDropdown');
+        dd.style.display = (dd.style.display === 'flex') ? 'none' : 'flex';
+    } else toggleModal();
+}
+function logout() { _supabase.auth.signOut().then(() => location.reload()); }
 function swapAuth() {
     isLoginMode = !isLoginMode;
-    const mTitle = document.getElementById('mTitle');
-    const swapText = document.getElementById('swapText');
-    
-    mTitle.innerText = isLoginMode ? "Join Novidra" : "Create Account";
-    swapText.innerText = isLoginMode ? "Create account" : "Already have an account? Login";
-}
-
-function logout() {
-    localStorage.removeItem('currentUser');
-    location.reload(); 
-}
-
-function swapAccount() {
-    localStorage.removeItem('currentUser');
-    checkLoginStatus();
-    document.getElementById('userDropdown').style.display = 'none';
-    toggleModal();
-}
-
-// --- SIDEBAR & CONTENT ---
-
-document.getElementById('menu-toggle').onclick = () => {
-    document.getElementById('sidebar').classList.toggle('open');
-};
-
-// Close dropdown if user clicks outside of the button
-window.onclick = function(event) {
-    if (!event.target.matches('#userBtn')) {
-        const dropdown = document.getElementById('userDropdown');
-        if (dropdown && dropdown.style.display === 'flex') {
-            dropdown.style.display = 'none';
-        }
-    }
-}
-
-function generateVideos() {
-    const container = document.getElementById('videoContainer');
-    // Clear container first
-    container.innerHTML = "";
-    for(let i=1; i<=12; i++) {
-        container.innerHTML += `
-            <div class="video-card">
-                <div class="thumb"></div>
-                <p class="v-title">Novidra Originals: Episode ${i}</p>
-                <p class="v-stats">Novidra Official • ${i*5}K views</p>
-            </div>`;
-    }
+    document.getElementById('mTitle').innerText = isLoginMode ? "Join Novidra" : "Create Channel";
 }
