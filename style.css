@@ -1,0 +1,82 @@
+:root {
+    --bg-dark: #050505;       /* Deep Black */
+    --card-bg: #111111;
+    --accent: #00ffff;        /* Neon Cyan */
+    --text-main: #ffffff;
+    --text-dim: #888888;
+    --border: #222222;
+}
+
+body {
+    margin: 0;
+    font-family: "Segoe UI", sans-serif;
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+}
+
+/* --- Header --- */
+header {
+    position: fixed; top: 0; width: 100%; height: 60px;
+    background: rgba(5, 5, 5, 0.95);
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0 20px; box-sizing: border-box; z-index: 1000;
+    border-bottom: 1px solid var(--border);
+}
+
+.logo { font-weight: 800; font-size: 20px; letter-spacing: 2px; color: var(--text-main); cursor: pointer; }
+.logo span { color: var(--accent); text-shadow: 0 0 8px var(--accent); }
+
+.search-bar { display: flex; flex-grow: 1; max-width: 500px; margin: 0 20px; }
+.search-bar input {
+    width: 100%; background: #000; border: 1px solid var(--border);
+    padding: 10px 15px; border-radius: 4px 0 0 4px; color: white; outline: none;
+}
+.search-bar input:focus { border-color: var(--accent); }
+.search-btn {
+    background: #111; border: 1px solid var(--border); border-left: none;
+    padding: 0 15px; border-radius: 0 4px 4px 0; color: white; cursor: pointer;
+}
+
+/* --- Dropdown Logic --- */
+.user-container { position: relative; }
+.dropdown-menu {
+    position: absolute; top: 50px; right: 0; width: 200px;
+    background: #111; border: 1px solid var(--border);
+    border-radius: 8px; display: none; flex-direction: column;
+    padding: 10px 0; box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+}
+.dropdown-item {
+    padding: 12px 20px; cursor: pointer; font-size: 14px;
+}
+.dropdown-item:hover { background: #222; color: var(--accent); }
+.logout { color: #ff4d4d; }
+
+.signin-btn {
+    background: none; border: 1px solid var(--accent); color: var(--accent);
+    padding: 8px 18px; border-radius: 4px; font-weight: bold; cursor: pointer;
+    transition: 0.3s;
+}
+.signin-btn:hover { background: var(--accent); color: #000; box-shadow: 0 0 15px var(--accent); }
+
+/* --- Sidebar & Grid --- */
+aside { position: fixed; top: 60px; left: 0; width: 240px; height: 100vh; background: var(--bg-dark); transition: 0.3s; border-right: 1px solid var(--border); }
+.nav-link { padding: 12px 24px; cursor: pointer; }
+.nav-link:hover { color: var(--accent); background: #111; }
+
+main { margin-top: 80px; margin-left: 240px; padding: 20px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+
+.video-card { width: 100%; cursor: pointer; }
+.thumb { 
+    width: 100%; aspect-ratio: 16/9; background: #111; border-radius: 4px; 
+    border-bottom: 2px solid transparent; transition: 0.3s;
+}
+.video-card:hover .thumb { border-color: var(--accent); transform: translateY(-5px); }
+.v-title { font-size: 15px; font-weight: 600; margin: 10px 0 5px 0; }
+.v-stats { color: var(--text-dim); font-size: 13px; }
+
+@media (max-width: 800px) {
+    aside { transform: translateX(-240px); }
+    main { margin-left: 0; }
+    aside.open { transform: translateX(0); }
+}
